@@ -8,6 +8,7 @@
 '''
 
 from vision_definitions import*
+#from PIL import Image
 import Image
 
 class Imagerie(object):
@@ -16,28 +17,30 @@ class Imagerie(object):
     '''
 
 
-    def __init__(self):
+    def __init__(self, connection):
         '''
         Constructor
         '''
+        self.__camProxy = connection.getProxy('ALVideoDevice')
         
     '''
     example
     '''
-    def getImage(self, camProxy):
+    def getImage(self):
         
         ####
         # Register a Generic Video Module
-        
-        resolution = kQVGA
+    
+        resolution = kQQVGA
         colorSpace = kRGBColorSpace
         fps = 30
-        
-        nameId = camProxy.subscribe("python_GVM", resolution, colorSpace, fps)
+        nameId = self.__camProxy.subscribe("python_GVM", resolution, colorSpace, fps)
         print nameId
         
-        resolution = kQQVGA
-        camProxy.setResolution(nameId, resolution)
+        #resolution = kQQVGA
+        #camProxy.setResolution(nameId, resolution)
+        
+        self.__camProxy.setParam(kCameraSelectID, 0)
         
         print 'getting image in remote'
         
@@ -49,9 +52,9 @@ class Imagerie(object):
         # results[4] : time stamp (highest 32 bits) 
         # results[5] : time stamp (lowest 32 bits)
         # results[6] : array of size height*width*nblayers containing image data
-        results = camProxy.getImageRemote(nameId)
+        results = self.__camProxy.getImageRemote(nameId)
             
-        camProxy.unsubscribe(nameId)
+        self.__camProxy.unsubscribe(nameId)
         
         print 'taille : ' + str(results[0]) + 'x' + str(results[1])
         print 'nombre de couche : ' + str(results[2])
@@ -64,21 +67,8 @@ class Imagerie(object):
         imgData = results[6]
         
         im = Image.fromstring("RGB", taille, imgData)
-        im.show()
-        
+        #im.show()
         print 'end of gvm_getImageLocal python script'
-        
-    ''' 
-    TO DO
-    ''' 
-    def detectePanneau(self):
-        print 'detection d\'un panneau...'
-        return 0 
-        
-    ''' 
-    TO DO
-    '''
-    def detecteExercice(self):
-        print 'detection de l\'exercice...'
-        return 0
+        return im
+    
         

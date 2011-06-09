@@ -7,7 +7,7 @@
 @description : Canevas de l'algorithme globale du projet
 '''
 
-from tools import Connexion, Stiffness, Deplacements, Imagerie
+from tools import Connexion, Stiffness, Deplacements, Imagerie, SquareFinder
 from exercices import Ex1, Ex2, Ex3, Ex4, Ex5
 
 
@@ -17,8 +17,8 @@ from exercices import Ex1, Ex2, Ex3, Ex4, Ex5
 Connexion au robot Nao
 '''
 def connexion():
-    #nomRobot = "astro"
-    nomRobot = "robby"
+    nomRobot = "astro"
+    #nomRobot = "robby"
 
     # objet de connexion au nao
     print 'connexion au robot ' + str(nomRobot) + '...'
@@ -80,11 +80,17 @@ def main():
     
     # objet controlant les deplacements du Nao d'un exercice a l'autre
     deplacements = Deplacements.Deplacements(c)
-    deplacements.poseInit()
+    #deplacements.poseInit()
+    deplacements.standUp()
     #deplacements.turn()
     #deplacements.bendHead()
     #deplacements.raiseHead()
-    deplacements.kneel2()
+    
+    
+    sf = SquareFinder.SquareFinder(c)
+    sf.orient()
+    
+    deplacements.kneel()
     stiffness.desasservir()
     
     # Temps que tous les exercices n'ont pas ete fait
