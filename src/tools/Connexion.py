@@ -24,8 +24,14 @@ class Connexion(object):
         else:
             if robot == "astro":
                 self.__ip = "10.194.70.11"
-            else:
+            elif robot == "astro-local":
+                self.__ip = "10.194.70.1"
+            elif robot == "robby":
                 self.__ip = "10.194.70.12"
+            elif robot == "robby-local":
+                self.__ip = "10.194.70.2"
+            else :
+                self.__ip = "10.194.70.11"
                 
         # port par defaut
         self.__port        = 9559
@@ -40,6 +46,7 @@ class Connexion(object):
         self.__LedsProxy            = None
         self.__LoggerProxy          = None
         self.__LogoDetectionProxy   = None
+        self.__LandMarkDetectionProxy = None
         self.__MemoryProxy          = None
         self.__MotionProxy          = None
         self.__SensorsProxy         = None
@@ -210,6 +217,14 @@ class Connexion(object):
                 except RuntimeError,e:
                     print str(e)
             return self.__LogoDetectionProxy
+        # ALLandMarkDetection
+        elif name == 'ALLandMarkDetection':
+            if self.__LandMarkDetectionProxy == None:
+                try:
+                    self.__LandMarkDetectionProxy = ALProxy("ALLandMarkDetection", self.__ip, self.__port)
+                except RuntimeError,e:
+                    print str(e)
+            return self.__LandMarkDetectionProxy
         # ALMemory
         elif name == 'ALMemory':
             if self.__MemoryProxy == None:

@@ -7,25 +7,21 @@
 @description : Canevas de l'algorithme globale du projet
 '''
 
-from tools import Connexion, Stiffness, Deplacements, Imagerie
+from tools import Connexion, Stiffness, Deplacements, Imagerie, MarkDetect
 from exercices import Ex1, Ex2, Ex3, Ex4, Ex5
-
-
 
 
 '''
 Connexion au robot Nao
 '''
 def connexion():
-    #nomRobot = "astro"
     nomRobot = "robby"
-
+    
     # objet de connexion au nao
     print 'connexion au robot ' + str(nomRobot) + '...'
     print '' 
     c         = Connexion.Connexion(nomRobot) # parametres possibles : None (localhost), astro, robby
     # connexion au nao
-    #c.connect()
     return c
 
 def doExercice(ex, proxy):
@@ -68,24 +64,21 @@ def main():
     print ''
     
     # connexion au robot Nao
-    c = connexion()
+    #c = connexion()
     
     # objet permettant d'asservir / desasservir les moteurs du robot
-    stiffness = Stiffness.Stiffness(c.getProxy("ALMotion"))
-    stiffness.asservir()
+    #asservir = Stiffness.Stiffness(proxy)
+    #asservir.asservir()
+    c = Connexion.Connexion('robby')
+    walker = MarkDetect.MarkDetect(c)
+    
+    walker.walkUntilDetection()
     
     # objet pour l'analyse d'image
-    #img = Imagerie.Imagerie()
-    #img.getImage(c.getProxy("ALVideoDevice"))
+    #analyseImage = Imagerie.Imagerie()
     
     # objet controlant les deplacements du Nao d'un exercice a l'autre
-    deplacements = Deplacements.Deplacements(c)
-    deplacements.poseInit()
-    #deplacements.turn()
-    #deplacements.bendHead()
-    #deplacements.raiseHead()
-    deplacements.kneel2()
-    stiffness.desasservir()
+    #deplacements = Deplacements.Deplacements()
     
     # Temps que tous les exercices n'ont pas ete fait
     #while not parcoursTermine(exercices):
@@ -99,9 +92,7 @@ def main():
         #panneau = analyseImage.detectePanneau()
         # ...
         # Tant que le nao n'est pas devant le panneau trouve
-    #deplacements.poseInit()
-    #deplacements.step()
-    #asservir.desasservir()
+            #deplacements.goTo()
             # ...
             # Estimer la distance et la direction
             # ...

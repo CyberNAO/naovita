@@ -8,7 +8,7 @@
 '''
 
 from vision_definitions import*
-from PIL import Image
+import Image
 
 class Imagerie(object):
     '''
