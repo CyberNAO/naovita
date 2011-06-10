@@ -22,14 +22,19 @@ class Deplacements(object):
         #self.__distanceAcceptable = 50
         self.__motionProxy = connection.getProxy('ALMotion')
     
-    def turn(self):
+    
+    def walkToCenter(self):
+        self.walk(5.5)
+        self.turn(2.231) #6pi/8
+    
+    def turn(self, Theta):
         #180 degrees
         self.__motionProxy.setMotionConfig([["ENABLE_FOOT_CONTACT_PROTECTION",True]])
         
         #TARGET VELOCITY
         X = 0.0
         Y = 0.0
-        Theta = 1.5709
+        #Theta = 1.5709
         Frequency = 0.4 #low speed
         self.__motionProxy.post.walkTo(X, Y, Theta)
         #self.__motionProxy.setWalkTargetVelocity(X, Y, Theta, Frequency)
@@ -37,7 +42,7 @@ class Deplacements(object):
         #time.sleep(4.0)
         
         self.__motionProxy.waitUntilWalkIsFinished()
-        print "finished"
+        #print "turn finished"
         #####################
         ## End Walk
         #####################
@@ -48,7 +53,7 @@ class Deplacements(object):
         #self.__motionProxy.setWalkTargetVelocity(  X, Y, Theta, Frequency)
         
 
-    def walk(self):
+    def walk(self, duration):
         #####################
         ## Enable arms control by Walk algorithm
         #####################
@@ -68,22 +73,23 @@ class Deplacements(object):
         Frequency = 0.3 #low speed
         self.__motionProxy.setWalkTargetVelocity(X, Y, Theta, Frequency)
         
-        time.sleep(4.0)
+        time.sleep(duration)
         
         #TARGET VELOCITY
-        X = 0.8
-        Y = 0.0
-        Theta = 0.0
-        Frequency = 1.0 #Max speed
-        self.__motionProxy.setWalkTargetVelocity(X, Y, Theta, Frequency)
+        #X = 0.8
+        #Y = 0.0
+        #Theta = 0.0
+        #Frequency = 1.0 #Max speed
+        #self.__motionProxy.setWalkTargetVelocity(X, Y, Theta, Frequency)
         
-        time.sleep(4.0)
+        #time.sleep(4.0)
         
         #####################
         ## Arms User Motion
         #####################
         
         # desactivate Left Arm
+        '''
         self.__motionProxy.setWalkArmsEnable(False, True)
         
         JointNames = ["LShoulderPitch", "LShoulderRoll","LElbowYaw","LElbowRoll"]
@@ -101,7 +107,7 @@ class Deplacements(object):
         self.__motionProxy.setWalkArmsEnable(True, True)
         
         time.sleep(2.0)
-        
+        '''
         #####################
         ## End Walk
         #####################
@@ -109,6 +115,42 @@ class Deplacements(object):
         X = 0.0
         Y = 0.0
         Theta = 0.0
+        self.__motionProxy.setWalkTargetVelocity(  X, Y, Theta, Frequency)
+
+
+
+    def omniWalk(self):
+        #####################
+        ## Enable arms control by Walk algorithm
+        #####################
+        self.__motionProxy.setWalkArmsEnable(True, True)
+        #~ motionProxy.setWalkArmsEnable(False, False)
+        
+        #####################
+        ## FOOT CONTACT PROTECTION
+        #####################
+        #~ motionProxy.setMotionConfig([["ENABLE_FOOT_CONTACT_PROTECTION",False]])
+        self.__motionProxy.setMotionConfig([["ENABLE_FOOT_CONTACT_PROTECTION",True]])
+        
+        #TARGET VELOCITY
+        X = 1.0
+        Y = 0.0
+        Theta = 0.0
+        Frequency = 0.3 #low speed
+        self.__motionProxy.post.setWalkTargetVelocity(X, Y, Theta, Frequency)
+        
+        #time.sleep(2.0)
+        
+
+    def stopWalk(self):        
+        #####################
+        ## End Walk
+        #####################
+        #TARGET VELOCITY
+        X = 0.0
+        Y = 0.0
+        Theta = 0.0
+        Frequency = 0.3 #low speed
         self.__motionProxy.setWalkTargetVelocity(  X, Y, Theta, Frequency)
 
 
@@ -456,7 +498,7 @@ class Deplacements(object):
         self.__motionProxy.angleInterpolationBezier(names, times, keys);
         #self.__motionProxy.waitUntilWalkIsFinished()
         
-        print "bend is finished"
+        #print "bend is finished"
         
 
     def raiseHead(self):
@@ -470,7 +512,7 @@ class Deplacements(object):
 
         self.__motionProxy.angleInterpolationBezier(names, times, keys);
         #self.__motionProxy.waitUntilWalkIsFinished()
-        print "raise is finished"
+        #print "raise is finished"
 
     '''
     TO DO

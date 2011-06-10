@@ -109,8 +109,10 @@ class Init_Pose(object):
         self.keys.append([ [ 0.00000, [ 2, -0.66667, 0.00000], [ 2, 0.00000, 0.00000]]])
         
         try:
-            self.__proxy.post.angleInterpolationBezier(self.names, self.times, self.keys);
+            self.__proxy.angleInterpolationBezier(self.names, self.times, self.keys);
         except BaseException, err:
             print str(err)
+            
+        return True
 
         

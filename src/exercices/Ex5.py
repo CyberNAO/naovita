@@ -9,7 +9,6 @@
                de haut en bas
 '''
 
-from naoqi import ALProxy
 from tools import Zero, Init_Pose
 
 class Ex5(object):
@@ -25,7 +24,7 @@ class Ex5(object):
         
     # ordonne au nao de faire l'exercice nbFois fois
     def do(self, nbFois):
-        
+
         if nbFois > 0:
             # initialisation
             self.initialisation()
@@ -177,7 +176,7 @@ class Ex5(object):
         keys.append([ [ 0.17453, [ 2, -0.03333, 0.00000], [ 2, 0.30000, 0.00000]], [ 0.17453, [ 2, -0.30000, 0.00000], [ 2, 0.16667, 0.00000]], [ 0.17453, [ 2, -0.16667, 0.00000], [ 2, 0.00000, 0.00000]]])
         
         try:
-            self.__proxy.post.angleInterpolationBezier(names, times, keys);
+            self.__proxy.angleInterpolationBezier(names, times, keys);
         except BaseException, err:
             print str(err)
 
@@ -292,7 +291,7 @@ class Ex5(object):
         keys.append([ [ 0.17453, [ 2, -0.03333, 0.00000], [ 2, 0.00000, 0.00000]]])
         
         try:
-            self.__proxy.post.angleInterpolationBezier(names, times, keys);
+            self.__proxy.angleInterpolationBezier(names, times, keys);
         except BaseException, err:
             print str(err)
 
@@ -407,12 +406,8 @@ class Ex5(object):
         keys.append([ [ 0.00000, [ 2, -0.03333, 0.00000], [ 2, 0.30000, 0.00000]], [ 0.17453, [ 2, -0.30000, 0.00000], [ 2, 0.33333, 0.00000]], [ 0.17453, [ 2, -0.33333, 0.00000], [ 2, 0.00000, 0.00000]]])
         
         try:
-            self.__proxy.post.angleInterpolationBezier(names, times, keys);
+            self.__proxy.angleInterpolationBezier(names, times, keys);
         except BaseException, err:
             print str(err)
-
-        
-        
-        
 
         

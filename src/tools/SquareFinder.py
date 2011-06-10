@@ -3,7 +3,7 @@ Created on 9 juin 2011
 
 @author: Bruno Barbieri
 '''
-from tools import Imagerie
+from tools import Imagerie, Deplacements
 import Image
 import ImageFilter
 import ImageChops
@@ -14,31 +14,60 @@ class SquareFinder:
         '''
         Constructor
         '''
-        self.__camProxy = connection.getProxy('ALVideoDevice')
+        #self.__camProxy = connection.getProxy('ALVideoDevice')
         self.__imagerie = Imagerie.Imagerie(connection)
+        
+        self.__walk = Deplacements.Deplacements(connection)
+        
+    def recon(self, firstTime):
+        self.__walk.poseInit()
+        if firstTime:
+            angle = self.orient()
+            if angle != None :
+                return angle
+        
+        self.__walk.bendHead()
+        angle = self.orient()
+        if angle != None :
+            self.__walk.raiseHead()
+            return angle
+        
+        self.__walk.raiseHead()
+        
+        self.__walk.kneel()
+        angle = self.orient()
+        
+        self.__walk.standUp()
+        return angle
+        #penser a tourner brusquement si y'a rien devant.
     
-    def orient(self):
+    def orient(self, color):
         im = self.__imagerie.getImage()
 
         width, height = im.size
+        squares, dists = self.findSquares(im, color)
         
-        squares, dists = self.findSquares(im)
-        
-        limit = width/12
-        for i in dists:
-            if abs(i) < limit:
-                print("IT'S JUST IN FRONT OF US !!!")
-            elif i < 0:
-                print("TO THE LEFT !!!!")
+        dir = None
+        limit = width/8
+        if len(dists) != 0:            
+            if abs(dists[0]) < limit:
+                #print("IT'S JUST IN FRONT OF US !!!")
+                dir = 0
+            elif dists[0] < 0:
+                #print("TO THE LEFT !!!!")
+                dir = 1
             else:
-                print("TO THE RIGHT !!!!")
+                #print("TO THE RIGHT !!!!")
+                dir = -1
                 
-        self.cropSquares(squares, im)
+        
+        return {color : dir}
+        #self.cropSquares(squares, im)
                 
     def cropSquares(self, squares, im):
         #crop the squares
         num = 0
-        print("cropping " + str(len(squares)) + " square regions")
+        print("--------------------------------cropping " + str(len(squares)) + " square regions")
         for square in squares:
             imgSquare = self.regionCropper(square, im)
             imgSquare.save("squareTest" + str(num) + ".png")
@@ -187,22 +216,24 @@ class SquareFinder:
             return True
         else:
             return False
-        
+    
         #finds blue squares on an image and returns the squares as lists of points (their convex hull) and
     #their distance from the center
-    def findSquares(self,image):
-        print("binarizing the image")
-        result = self.erode(self.erode(self.erode(self.ColorBinarizator(image))))
+    def findSquares(self,image, color):
+        print("--------------------------------binarizing the image")
+        result = self.ColorBinarizator(image, color)
         
         
         width, height = result.size
             
         #find the regions
-        print("finding regions")
+        #print("finding regions")
         regions = self.regionFinder(result)
+        if len(regions) > 0:
+            print("size of the region : " + str(len(regions[0])))
         
         #try to find squares
-        
+        '''
         squares = []
         dists = []
         print("classifying " + str(len(regions)) + " regions")
@@ -217,26 +248,42 @@ class SquareFinder:
             if isThisSquare:
                 squares.append(region)
                 dists.append(massCenter[0] - (width/2))
-            
         return (squares, dists)
+        '''
+        dists = []
+        for region in regions:
+            massCenter = self.getMassCenter(region)
+            dists.append(massCenter[0] - width/2)
+        return (regions, dists)
     
     #bynarizes the image according to fix threshold values on the colors
-    def ColorBinarizator(self,image):
+    def ColorBinarizator(self, image, color):
         image = image.filter(ImageFilter.BLUR)
         red, green, blue = image.split()
         width, height = image.size
         
+        if color == "blue":
+            impColor = blue
+        elif color == "red":
+            impColor = red
+        else:
+            impColor = green
         max = 0
         img = Image.new("L", (width, height))
         for x in range(width):
             for y in range(height):
-                sum = blue.getpixel((x,y)) + green.getpixel((x,y)) + red.getpixel((x,y))
-                value = round((float(blue.getpixel((x,y))) / float(sum)) * 255)
+                sum = blue.getpixel((x,y)) + green.getpixel((x,y)) + red.getpixel((x,y))+1
+                value = round((float(impColor.getpixel((x,y))) / float(sum)) * 255)
                 img.putpixel((x, y), value)
                 if value > max:
                     max = value
-                  
-        threshold = round(0.8*float(max))  
+                    
+        img.save("beforeT.png")
+        print "max " + color + " = " + str(max)
+        if max > 120:
+            threshold = round(0.85*float(max))
+        else:
+            threshold = 256
         table = []
         for i in range(256):
             if i < threshold:
@@ -248,6 +295,8 @@ class SquareFinder:
                 
         img = self.erode(img)
         img = self.dilate(img)
+        
+        img.save("afterT.png")
         
         return img
     

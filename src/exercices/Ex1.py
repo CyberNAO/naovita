@@ -10,7 +10,6 @@
                en avant, bras droit en arriere et inversement)
 '''
 
-from naoqi import ALProxy
 from tools import Zero, Init_Pose
 
 class Ex1(object):
@@ -67,6 +66,7 @@ class Ex1(object):
         initPose = Init_Pose.Init_Pose(self.__proxy)
         initPose.do()
         
+        
     '''
     Decrit les mouvements pour un balancement des bras
     '''
@@ -84,7 +84,7 @@ class Ex1(object):
         keys.append([ [ -0.87266, [ 2, -0.33333, 0.00000], [ 2, 0.33333, 0.00000]], [ 1.48353, [ 2, -0.33333, -0.49304], [ 2, 0.33333, 0.49304]], [ 2.08560, [ 2, -0.33333, 0.00000], [ 2, 0.00000, 0.00000]]])
         
         try:
-            self.__proxy.post.angleInterpolationBezier(names, times, keys);
+            self.__proxy.angleInterpolationBezier(names, times, keys);
         except BaseException, err:
             print str(err)
         
@@ -198,7 +198,7 @@ class Ex1(object):
         keys.append([ [ 0.00000, [ 2, -0.03333, 0.00000], [ 2, 0.00000, 0.00000]]])
         
         try:
-            self.__proxy.post.angleInterpolationBezier(names, times, keys);
+            self.__proxy.angleInterpolationBezier(names, times, keys);
         except BaseException, err:
             print str(err)
 

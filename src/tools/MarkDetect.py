@@ -9,6 +9,7 @@
 '''
 
 import time
+from tools import Imagerie, Deplacements
 import motion
 from vision_definitions import *
 
@@ -18,8 +19,9 @@ class MarkDetect(object):
         '''
             Constructor
         '''        
-        # Needs both proxies to move and detect nao marks
-        self.__motionProxy = connection.getProxy('ALMotion')
+        # Needs both proxies to move and detect nao marks        
+        self.__imagerie = Imagerie.Imagerie(connection)
+        self.__motion = Deplacements.Deplacements(connection)
         
         # Subscribe to the ALLandMarkDetection proxy
         # This means that the module will write in ALMemory with
@@ -33,49 +35,97 @@ class MarkDetect(object):
         self.__memValue = "LandmarkDetected"
         
         # Get camera proxy
-        self.__cameraProxy = connection.getProxy('ALVideoDevice')
+        #self.__cameraProxy = connection.getProxy('ALVideoDevice')
         
 
-    def walkUntilDetection(self):
-        '''
-            Walk until a nao mark is seen on the floor
-        '''
-        
-        #select the lower camera
-        #self.__switchCam('low')
-        
+    def findMarks(self):
+        #self.__imagerie.switchCam('low')
         ids = {}
         # A simple loop that reads the memValue and checks whether landmarks are detected.
+        #for i in range(0, 20):
+        #    time.sleep(0.5)
         for i in range(0, 20):
-            time.sleep(0.5)
-            #id = self.getMarkId()
+            time.sleep(0.25)
+            id = self.getMarkId()
             
             if id != None :
                 if id not in ids.keys() :
                     ids[id] = 1
                 else :        
                     ids[id] += 1
-            
-        #maxDected = max(ids.values())
-        #for id in ids.keys() :
-        #    if ids[id] == maxDected :
-        #        detectedId = ids[id]
         
-        maxDected = max(ids, key=ids.get)
         
-        print "Detected mark id is " + str(maxDected)
+        #self.__imagerie.switchCam('high')
+        
+        if len(ids) == 0:
+            return None
+        else:
+            return ids
+        
 
+    def __checkHighResMarks(self):
+        #self.__imagerie.switchRes("high")
+        ids = self.findMarks()
+        if ids == None or len(ids) == 0:
+            print("HiRes : no mark detected")
+            return None
         
-        # unsubscribe proxies
-        self.__unsubscribe()
-    
+        maxDetected = max(ids, key=ids.get)
+        print("HiRes mark :" + str(maxDetected))        
+        return maxDetected
+
+
+    def walkUntilDetection(self):
+        '''
+            Walk until a nao mark is seen on the floor
+        '''
+        
+        #walk endlessly
+        #self.__motion.omniWalk()
+        self.__imagerie.switchRes("high")
+        self.__motion.bendHead()
+        
+        ids = self.findMarks()
+        if ids != None and len(ids) != 0:
+            maxDetected = max(ids, key=ids.get)
+            if ids[maxDetected] > 3:
+                print "Detected mark id is " + str(maxDetected)
+                self.__motion.stopWalk()
+                #maxDetected = self.__checkHighResMarks()
+                
+                return maxDetected
+        
+        else:
+            #no marks found yet
+            return None
+        
+            '''
+            else :
+                print "Not sure"
+                #stop
+                self.__motion.stopWalk()
+            
+                #redetect
+                ids = self.findMarks()
+                
+            maxDetected = max(ids, key=ids.get)
+            if ids[maxDetected] > 3:
+                print "Detected mark id is " + str(maxDetected)
+                maxDetected = self.__checkHighResMarks()
+                return maxDetected
+            
+           
+            self.__motion.omniWalk() #was a mistake
+            return None
+            '''
     
     def getMarkId(self):
         val = self.__memoryProxy.getData(self.__memValue)
+        '''
         print ""
         print "*****"
         print ""
-        
+        '''
         # Check whether we got a valid output: a list with two fields.
         if(val and isinstance(val, list) and len(val) == 2):
     
@@ -95,10 +145,10 @@ class MarkDetect(object):
                     # Second Field = Extra info (ie, mark ID).
                     markExtraInfo = markInfo[1]
                     id = markExtraInfo[0]
-                    print "mark  ID: %d" % (markExtraInfo[0])
-                    print "  alpha %.3f - beta %.3f" % (markShapeInfo[1], markShapeInfo[2])
-                    print "  width %.3f - height %.3f" % (markShapeInfo[3], markShapeInfo[4])
-                    return id
+                    #print "mark  ID: %d" % (markExtraInfo[0])
+                    #print "  alpha %.3f - beta %.3f" % (markShapeInfo[1], markShapeInfo[2])
+                    #print "  width %.3f - height %.3f" % (markShapeInfo[3], markShapeInfo[4])
+                    #return id
 
             except Exception, e:
                 print "Naomarks detected, but it seems getData is invalid. ALValue ="
@@ -106,25 +156,10 @@ class MarkDetect(object):
                 print "Error msg %s" % (str(e))
         
         else:
-            print "No landmark detected"
+            #print "No landmark detected"
             return None
     
-    
-    def __switchCam(self, camId):
-        '''
-            high is 1, low is 0 
-        '''
-        if camId == 'low':
-            camId = 1
-        else:
-            camId = 0
-        
-        self.__cameraProxy.subscribe("MarkDetect", kQVGA, kRGBColorSpace, 30)
-        self.__cameraProxy.setParam(kCameraSelectID, camId)
-        
-        self.__cameraProxy.unsubscribe(self.__cameraProxy)
-    
-    def __unsubscribe(self):
+    def unsubscribe(self):
         '''
             Destroy method
         '''

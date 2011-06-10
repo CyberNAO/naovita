@@ -7,8 +7,7 @@
 @description : Canevas de l'algorithme globale du projet
 '''
 
-from tools import Connexion, Stiffness, Deplacements, Imagerie, SquareFinder,\
-    MarkDetect
+from tools import Connexion, Stiffness, Deplacements, Imagerie, SquareFinder
 from exercices import Ex1, Ex2, Ex3, Ex4, Ex5
 
 
@@ -72,98 +71,51 @@ def main():
     c = connexion()
     
     # objet permettant d'asservir / desasservir les moteurs du robot
-    stiffness = Stiffness.Stiffness(c.getProxy("ALMotion"))
-    stiffness.asservir()
+    #stiffness = Stiffness.Stiffness(c.getProxy("ALMotion"))
+    #stiffness.asservir()
     
     # objet pour l'analyse d'image
     #img = Imagerie.Imagerie()
     #img.getImage(c.getProxy("ALVideoDevice"))
     
     # objet controlant les deplacements du Nao d'un exercice a l'autre
-    deplacements = Deplacements.Deplacements(c)
-    deplacements.poseInit()
+    #deplacements = Deplacements.Deplacements(c)
+    #deplacements.poseInit()
     #deplacements.standUp()
     #deplacements.turn()
     #deplacements.bendHead()
     #deplacements.raiseHead()
     
+    
     sf = SquareFinder.SquareFinder(c)
-    
-    i = Imagerie.Imagerie(c)
-    i.switchCam("high")
-    
+    '''
     #while not mark detection machins
-    markDetect = MarkDetect.MarkDetect(c)
-    
     direction = sf.recon(True)
     while True:
         if direction == None:
             direction = sf.recon(False)
             if direction == None:
                 #perdu !
-                print("I am lost !")
+                print("Je suis perdu !")
                 break;
 
         if direction == 0:
-            deplacements.walk(3.0)
-            img = i.getImage()
-            squares, dists = sf.findSquares(img, "blue")
-            print("Right in front of me")
-            deplacements.bendHead()
-            i.switchCam("low")
-            #distRapport = 4 - (area-200)/100.0 * 0.35 
-            #if (distRapport < 0.5) distRapport = 0.5
-            #elif (distRapport > 6) distRapport = 6
-            
-            deplacements.walk(3.0)
-            img = i.getImage()
-            squares, dists = sf.findSquares(img, "blue")
-            
-            if len(squares) > 0 :
-                print "!!!!!!Found the blue cube!"
-                deplacements.raiseHead()
-                i.switchCam("high")
-                break
-            else :
-                print "NO blue square"
-                deplacements.raiseHead()
-                i.switchCam("high")
-            
-            #markDetect.walkUntilMark()
-            #markID = markDetect.walkUntilDetection()
-            
+    #        deplacements.walk()
         else:
-            if direction > 0:
-                print("On the left")
-            else:
-                print("On the right")
-            deplacements.turn(direction * 0.1963) #pi/16
+    #        deplacements.turn(direction * 0.1963) #pi/16
         direction = sf.orient()
+            
+    '''
+        
+    i = Imagerie.Imagerie(c)
+    i.switchCam("low")
+    sf.findSquares(i.getImage(), "blue")
     
-    #il detecte une marque 
+    i.unsubscribe()
+    #deplacements.poseInit()
     
-    deplacements.poseInit()
-    deplacements.turn(3.14)
-    
-    
-    ###################################
-    #: faire un exo
-    ######################################
-    
-    deplacements.kneel()
-    deplacements.poseInit()
-    
-    #####################################
-    
-    # save image
-    #image = i.getImage()
-    #i.save("lastImage.png")
-   
-    deplacements.walkToCenter()
-    deplacements.poseInit()
-    deplacements.kneel()
-    
-    stiffness.desasservir()
+    #deplacements.kneel()
+    #stiffness.desasservir()
     
     # Temps que tous les exercices n'ont pas ete fait
     #while not parcoursTermine(exercices):

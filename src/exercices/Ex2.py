@@ -10,7 +10,7 @@
                puis de monter les mains au dessus de la tete 
                en gardant les bras tendus
 '''
-from naoqi import ALProxy
+
 from tools import Zero, Init_Pose
 
 class Ex2(object):
@@ -67,6 +67,7 @@ class Ex2(object):
         initPose = Init_Pose.Init_Pose(self.__proxy)
         initPose.do()
         
+        
     '''
     Decrit les mouvements de l'exercice
     '''
@@ -104,7 +105,7 @@ class Ex2(object):
         keys.append([ [ 0.00000, [ 2, -0.03333, 0.00000], [ 2, 0.00000, 0.00000]]])
         
         try:
-            self.__proxy.post.angleInterpolationBezier(names, times, keys);
+            self.__proxy.angleInterpolationBezier(names, times, keys);
         except BaseException, err:
             print str(err)
 
@@ -219,7 +220,7 @@ class Ex2(object):
         keys.append([ [ 0.00000, [ 2, -0.03333, 0.00000], [ 2, 0.00000, 0.00000]]])
         
         try:
-            self.__proxy.post.angleInterpolationBezier(names, times, keys);
+            self.__proxy.angleInterpolationBezier(names, times, keys);
         except BaseException, err:
             print str(err)
 
