@@ -13,15 +13,19 @@
 
 import time
 from naoqi import ALProxy
+from vision_definitions import *
 
 # Replace here with your robot's IP address.
-IP = "10.194.70.12"
+IP = "10.194.70.11"
 
 PORT = 9559
 
 # Create a proxy to ALLandMarkDetection
 try:
     landMarkProxy = ALProxy("ALLandMarkDetection", IP, PORT)
+    camProxy = ALProxy("ALVideoDevice", IP, PORT)
+    camId = camProxy.subscribe("MarkDetect", kQQVGA, kRGBColorSpace, 30)
+    
 except Exception, e:
     print "Error when creating landmark detection proxy:"
     print str(e)
@@ -88,5 +92,7 @@ for i in range(0, 20):
 
 # Unsubscribe the module.
 landMarkProxy.unsubscribe("Test_LandMark")
+camProxy.unsubscribe("MarkDetect")
+camProxy.unsubscribe(camId)
 
 print "Test terminated successfully."

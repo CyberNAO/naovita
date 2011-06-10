@@ -3,7 +3,7 @@
                 PROJET DE SEMESTRE PRINTEMPS 2011
                     PARCOURS VITA POUR NAO
 
-@author      : Arnaud BEGUIN
+@author      : Alex Bulla
 @description : Classe contenant les methodes de deplacements
                jusqu'aux exercices
 '''

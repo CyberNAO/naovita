@@ -8,8 +8,8 @@
 '''
 
 from tools import Connexion, Stiffness, Deplacements, Imagerie, SquareFinder,\
-    MarkDetect, Init_Pose
-from exercices import Ex1, Ex2, Ex3, Ex4, Ex5
+    MarkDetect, Init_Pose, Speech
+from exercices import Ex1, Ex2, Ex3, Ex4, Ex5, Ex6
 import time
 
 
@@ -28,34 +28,9 @@ def connexion():
     # connexion au nao
     #c.connect()
     return c
-
-def doExercice(ex, proxy):
     
-    # creation de l'objet correspondant a l'exercice a faire
-    exercice = {
-      1 : Ex1.Ex1(proxy),
-      2 : Ex2.Ex2(proxy),
-      3 : Ex3.Ex3(proxy),
-      4 : Ex4.Ex4(proxy),
-      5 : Ex5.Ex5(proxy)
-    }[ex]()
-    
-    # lancement de l'exercice
-    exercice.do(1)
-        
-    
-'''
-Condition d'arret de l'algorithme : tous les exercices ont ete fait
-'''
-def parcoursTermine(exercices):
-    termine = True
-    for ex in exercices:
-        if not ex:
-            termine = False
-    return termine
-
-
-def joinTheTotem(img, sf, deplacements):
+#returns nb blue cubes
+def joinTheTotem(img, sf, deplacements, speech):
     
     #loop until the totem
     turnCount = 0
@@ -63,41 +38,48 @@ def joinTheTotem(img, sf, deplacements):
         #get blue cube
         img.switchCam("low")
         deplacements.bendHead()
-        dir = sf.orient('blue')
+        dir = sf.recon('blue')
         deplacements.raiseHead()
         img.switchCam("high")
         
         
-        if dir['blue'] != None :
-            print "!!!!!!Found the blue cube!"
+        if dir['blue'][0] != None :
+            print "###### Found the blue cube! ######"
+            nbCubes = dir['blue'][1]
+            print "###### " + str(nbCubes) + " cube(s) ######"
+            if nbCubes == 1: cubeWord = "one treasure"
+            else:           cubeWord = "many treasures"
+            speech.say("Oh Ho! I found " + cubeWord)
             turnCount = 0
-            break
+            return nbCubes
             
         else :
-            dir = sf.orient('red')
-            if dir['red'] != None :
+            dir = sf.recon('red')
+            if dir['red'][0] != None :
                 turnCount = 0
                 #go to the red totem
                 print "Go to the red totem"
-                if dir['red'] != 0:
-                    print "Turn " + str(dir['red'])
-                    deplacements.turn(dir['red'] * 0.1963) #pi/16
+                if dir['red'][0] != 0:
+                    print "Turn " + str(dir['red'][0])
+                    deplacements.turn(dir['red'][0] * 0.1963) #pi/16
             
                 else :
                     #go straight
                     print "Go straight"
+                    speech.say("I see the red to taim.")
                     deplacements.walk(3.0) #adapt dist
             else :
                 print("I am lost !")
+                speech.say("I am lo-ost !")
                 deplacements.turn(-0.7853) #pi/4
                 turnCount += 1
                 
     #end loop
     #####
-    if turnCount > 4 :
-        print("I am REEALLY lost !")
-    
-    
+    if turnCount > 5 :
+        print("Help, I am REEALLY lost !")
+        speech.say("Help, I am REEALLY lost ! Can't see the to taim.")
+        return None
     ################3old school
 
             #distRapport = 4 - (area-200)/100.0 * 0.35 
@@ -129,7 +111,7 @@ def doExercice(ex, proxy, nbFois):
 
 def main():
     
-    exercices = [False, False, False, False, False]
+    #exercices = [False, False, False, False, False]
     
     print '##############################################################'
     print '                    CYBERNETIQUE APPLIQUEE                    '
@@ -143,67 +125,63 @@ def main():
     c = connexion()
     
     # objet permettant d'asservir / desasservir les moteurs du robot
-    stiffness = Stiffness.Stiffness(c.getProxy("ALMotion"))
+    stiffness = Stiffness.Stiffness(c)
     stiffness.asservir()
-    
-    # objet pour l'analyse d'image
-    #img = Imagerie.Imagerie()
-    #img.getImage(c.getProxy("ALVideoDevice"))
-    
     # objet controlant les deplacements du Nao d'un exercice a l'autre
     deplacements = Deplacements.Deplacements(c)        
+    # objets pour l'analyse d'image
     img = Imagerie.Imagerie(c)
     sf = SquareFinder.SquareFinder(c)
+    # objets pour la gestion de la parole
+    speech = Speech.Speech(c)
     
-    deplacements.poseInit()
+    
     #deplacements.standUp()
-    #deplacements.turn()
-    #deplacements.bendHead()
-    #deplacements.raiseHead()
-    
-    
-    joinTheTotem(img, sf, deplacements)
-    #il detecte une marque 
-    
-    deplacements.poseInit()
-    deplacements.turn(3.14)
-    
-    
-    # objet permettant d'initialiser la position du robo
-    ALMotionProxy = c.getProxy("ALMotion")
-    init = Init_Pose.Init_Pose(ALMotionProxy)
-    
-    ###################################
-    #: faire un exo
-    init.do()
-    doExercice(1, ALMotionProxy, 1)
-    time.sleep(0.5)
-    
-    #walk to 1
-    deplacements.poseInit()   
-    deplacements.walkToCenter()
-    deplacements.poseInit()
-    
-    joinTheTotem(img, sf, deplacements)
-    #il detecte une marque 
-    
-    deplacements.poseInit()
-    deplacements.turn(3.14)
-    
-    
-    ###################################
-    #: faire un exo
-    init.do()
-    doExercice(2, ALMotionProxy, 1)
-    time.sleep(0.5)
-    
-    #walk to 2
-    deplacements.poseInit()
-    deplacements.walkToCenter()
-    deplacements.poseInit()
+    ############          Do exercices            #############    
+    for i in range(1, 3) :
+        deplacements.poseInit()
+        exoId = joinTheTotem(img, sf, deplacements, speech)
+        #il detecte une marque
+        
+        deplacements.poseInit()
+        deplacements.turn(3.14)
+        
+        
+        # objet permettant d'initialiser la position du robo
+        ALMotionProxy = c.getProxy("ALMotion")
+        init = Init_Pose.Init_Pose(ALMotionProxy)
+        
+        #: faire l'exo
+        init.do()
+        doExercice(exoId, ALMotionProxy, 2)
+        time.sleep(0.5)
+        
+        #walk to the center again 
+        deplacements.poseInit()   
+        deplacements.walkToCenter()
+        deplacements.poseInit()
+        
+        joinTheTotem(img, sf, deplacements, speech)
+        #il detecte une marque 
+        
+        deplacements.poseInit()
+        deplacements.turn(3.14)
+        
+        
+        ###################################
+        #: faire un exo
+        init.do()
+        doExercice(2, ALMotionProxy, 2)
+        time.sleep(0.5)
+        
+        #walk to 2
+        deplacements.poseInit()
+        deplacements.walkToCenter()
+        deplacements.poseInit()
     
     
     ########### Vertig
+    speech.say("Pa Pa nA da taaa")
     deplacements.kneel()
     stiffness.desasservir()
     

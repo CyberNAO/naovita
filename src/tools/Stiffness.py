@@ -15,11 +15,11 @@ class Stiffness(object):
     '''
 
 
-    def __init__(self, p):
+    def __init__(self, connection):
         '''
         Constructor
         '''
-        self.__proxy    = p
+        self.__proxy    = connection.getProxy("ALMotion")
         self.corps      = "Body"  # Body = collection de tous les joints du robots
         self.stiffness  = 0.0     # moteur desasservis par defaut
         self.temps      = 1.0     # effectue l'ordre tout de suite

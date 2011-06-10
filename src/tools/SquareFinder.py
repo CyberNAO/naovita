@@ -19,7 +19,7 @@ class SquareFinder:
         
         self.__walk = Deplacements.Deplacements(connection)
         
-    def recon(self, firstTime):
+    def recon_old(self, firstTime):
         self.__walk.poseInit()
         if firstTime:
             angle = self.orient()
@@ -40,6 +40,31 @@ class SquareFinder:
         self.__walk.standUp()
         return angle
         #penser a tourner brusquement si y'a rien devant.
+
+
+    def recon(self, color):
+        im = self.__imagerie.getImage()
+
+        width, height = im.size
+        squares, dists = self.findSquares(im, color)
+        
+        dir = None
+        limit = width/8
+        if len(dists) != 0:            
+            if abs(dists[0]) < limit:
+                #print("IT'S JUST IN FRONT OF US !!!")
+                dir = 0
+            elif dists[0] < 0:
+                #print("TO THE LEFT !!!!")
+                dir = 1
+            else:
+                #print("TO THE RIGHT !!!!")
+                dir = -1
+                
+        
+        return {color : (dir, len(squares)) }
+        #self.cropSquares(squares, im)
+
     
     def orient(self, color):
         im = self.__imagerie.getImage()
