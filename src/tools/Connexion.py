@@ -8,8 +8,6 @@
                (en local par defaut)
 '''
 
-from naoqi import ALProxy
-
 class Connexion(object):
 
 

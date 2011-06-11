@@ -67,7 +67,8 @@ def joinTheTotem(img, sf, deplacements, speech):
                     #go straight
                     print "Go straight"
                     speech.say("I see the red to taim.")
-                    deplacements.walk(3.0) #adapt dist
+                    range = dir['red'][2]
+                    deplacements.walk(range)   #3.0) #adapt dist
             else :
                 print("I am lost !")
                 speech.say("I am lo-ost !")
@@ -76,9 +77,9 @@ def joinTheTotem(img, sf, deplacements, speech):
                 
     #end loop
     #####
-    if turnCount > 5 :
+    if turnCount >= 5 :
         print("Help, I am REEALLY lost !")
-        speech.say("Help, I am REEALLY lost ! Can't see the to taim.")
+        speech.say("Help, I am REEALLY lost !")
         return None
     ################3old school
 
@@ -88,25 +89,44 @@ def joinTheTotem(img, sf, deplacements, speech):
             
         ############################
 
-def doExercice(ex, proxy, nbFois):
+def doDance(id, c):
+    frameProxy = c.getProxy("ALFrameManager")
+    if id == 1 :
+        behaviorID = frameProxy.newBehaviorFromFile("/home/nao/behaviors/dance/behavior.xar", "")
+    elif id == 2 :
+        behaviorID = frameProxy.newBehaviorFromFile("/home/nao/behaviors/dance/behavior.xar", "")
+    else :
+        behaviorID = frameProxy.newBehaviorFromFile("/home/nao/behaviors/dance/behavior.xar", "")
+    
+    print "Danse"
+    frameProxy.completeBehavior(behaviorID)
+    
+
+
+def doExercice(ex, c, nbFois):
+    
+    proxy = c.getProxy("ALMotion")
     
     # creation de l'objet correspondant a l'exercice a faire
     if ex == 2:
         exercice = Ex2.Ex2(proxy)
     elif ex == 3:
-        exercice = Ex3.Ex3(proxy)
-        nbFois = nbFois - 1
+        frameProxy = c.getProxy("ALFrameManager")
+        behaviorID = frameProxy.newBehaviorFromFile("/home/nao/behaviors/dance/behavior.xar", "")
+        print "Danse"
+        frameProxy.completeBehavior(behaviorID)
     elif ex == 4:
         exercice = Ex4.Ex4(proxy)
     elif ex == 5:
         exercice = Ex5.Ex5(proxy)
     elif ex == 6:
         exercice = Ex6.Ex6(proxy)
-    else:
+    elif ex == 1:
         exercice = Ex1.Ex1(proxy)
     
     # lancement de l'exercice
-    exercice.do(nbFois)
+    if ex != 3 :
+        exercice.do(nbFois)
     
 
 def main():
@@ -128,7 +148,9 @@ def main():
     stiffness = Stiffness.Stiffness(c)
     stiffness.asservir()
     # objet controlant les deplacements du Nao d'un exercice a l'autre
-    deplacements = Deplacements.Deplacements(c)        
+    deplacements = Deplacements.Deplacements(c)
+    # objet permettant d'initialiser la position du robo
+    init = Init_Pose.Init_Pose(c.getProxy("ALMotion"))
     # objets pour l'analyse d'image
     img = Imagerie.Imagerie(c)
     sf = SquareFinder.SquareFinder(c)
@@ -137,51 +159,40 @@ def main():
     
     
     #deplacements.standUp()
-    ############          Do exercices            #############    
+    ############          Do exercises            #############    
     for i in range(1, 3) :
+        if i == 1 :
+            speech.say("Rock'n'roll!")
+        else :
+            #walk to the center again 
+            deplacements.poseInit()   
+            deplacements.walkToCenter()
+        
+        # walk to the next totem
         deplacements.poseInit()
         exoId = joinTheTotem(img, sf, deplacements, speech)
-        #il detecte une marque
+        if exoId == None :
+            init.do()
+            break
+        
+        #TODO : NAO mark detection
         
         deplacements.poseInit()
         deplacements.turn(3.14)
         
-        
-        # objet permettant d'initialiser la position du robo
-        ALMotionProxy = c.getProxy("ALMotion")
-        init = Init_Pose.Init_Pose(ALMotionProxy)
-        
-        #: faire l'exo
+        # do the exercise
         init.do()
-        doExercice(exoId, ALMotionProxy, 2)
-        time.sleep(0.5)
-        
-        #walk to the center again 
-        deplacements.poseInit()   
-        deplacements.walkToCenter()
-        deplacements.poseInit()
-        
-        joinTheTotem(img, sf, deplacements, speech)
-        #il detecte une marque 
-        
-        deplacements.poseInit()
-        deplacements.turn(3.14)
-        
-        
-        ###################################
-        #: faire un exo
-        init.do()
-        doExercice(2, ALMotionProxy, 2)
-        time.sleep(0.5)
-        
-        #walk to 2
-        deplacements.poseInit()
-        deplacements.walkToCenter()
-        deplacements.poseInit()
+        doExercice(exoId, c, 2)
+        #doDanse(exoId, c)
+        time.sleep(4)
     
     
     ########### Vertig
-    speech.say("Pa Pa nA da taaa")
+    if exoId == None :
+        speech.say("Being a scavenger is really exhausting!")
+    else :
+        speech.say("Pa Pa nA da taaa")
+    
     deplacements.kneel()
     stiffness.desasservir()
     

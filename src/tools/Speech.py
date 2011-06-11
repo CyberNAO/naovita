@@ -20,7 +20,7 @@ class Speech(object):
         '''
         #self.__distanceAcceptable = 50
         self.__tts = connection.getProxy('ALTextToSpeech')
-        self.__tts.setVolume(0.8)
+        self.__tts.setVolume(0.9)
         
     def say(self, text):
         self.__tts.post.say(text)

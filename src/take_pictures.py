@@ -79,8 +79,8 @@ def main():
     #img.getImage(c.getProxy("ALVideoDevice"))
     
     # objet controlant les deplacements du Nao d'un exercice a l'autre
-    #deplacements = Deplacements.Deplacements(c)
-    #deplacements.poseInit()
+    deplacements = Deplacements.Deplacements(c)
+    deplacements.poseInit()
     #deplacements.standUp()
     #deplacements.turn()
     #deplacements.bendHead()
@@ -108,8 +108,13 @@ def main():
     '''
         
     i = Imagerie.Imagerie(c)
-    i.switchCam("low")
-    sf.findSquares(i.getImage(), "blue")
+    i.switchCam("high")
+    image = i.getImage()
+    image.save("pic_raised.png")
+    deplacements.bendHead()
+    image.save("pic_bended.png")
+    deplacements.raiseHead()
+    #sf.findSquares(i.getImage(), "blue")
     
     i.unsubscribe()
     #deplacements.poseInit()

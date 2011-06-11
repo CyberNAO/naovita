@@ -42,7 +42,7 @@ class SquareFinder:
         #penser a tourner brusquement si y'a rien devant.
 
 
-    def recon(self, color):
+    def MYrecon(self, color):
         im = self.__imagerie.getImage()
 
         width, height = im.size
@@ -65,6 +65,39 @@ class SquareFinder:
         return {color : (dir, len(squares)) }
         #self.cropSquares(squares, im)
 
+    def recon(self, color):
+        im = self.__imagerie.getImage()
+
+        width, height = im.size
+        squares, dists = self.findSquares(im, color)
+        
+        dir = None
+        limit = width/8
+        if len(dists) != 0:            
+            if abs(dists[0]) < limit:
+                #print("IT'S JUST IN FRONT OF US !!!")
+                dir = 0
+            elif dists[0] < 0:
+                #print("TO THE LEFT !!!!")
+                dir = 1
+            else:
+                #print("TO THE RIGHT !!!!")
+                dir = -1
+                
+        range = None
+        if dir != None and color == "red" :
+            range = self.getRange(len(squares[0]))
+            
+        return {color : (dir, len(squares), range) }
+        #self.cropSquares(squares, im)
+    
+    def getRange(self, area):
+        if area < 250 :
+            return 6.0
+        elif area >= 250 and area < 900 :
+            return 3.0
+        elif area >= 900 :
+            return 2.0
     
     def orient(self, color):
         im = self.__imagerie.getImage()
